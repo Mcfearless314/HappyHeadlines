@@ -1,0 +1,6 @@
+@HappyHeadlines_HostAddress = http://localhost:5272
+
+GET {{HappyHeadlines_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

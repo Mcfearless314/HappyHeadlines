@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HappyHeadlines", "HappyHeadlines\HappyHeadlines.csproj", "{6AF79F06-E5B2-4D7F-A378-C18DA87381EC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6AF79F06-E5B2-4D7F-A378-C18DA87381EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6AF79F06-E5B2-4D7F-A378-C18DA87381EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6AF79F06-E5B2-4D7F-A378-C18DA87381EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6AF79F06-E5B2-4D7F-A378-C18DA87381EC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
