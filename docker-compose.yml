@@ -1,0 +1,99 @@
+services:
+  article-service:
+    build:
+      context: .
+      dockerfile: ArticleService/Dockerfile
+    deploy:
+      replicas: 3
+         
+  africa-article-db:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    environment:
+      MSSQL_SA_PASSWORD: "SuperSecret7!"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - africa-data:/var/opt/mssql
+
+  antarctica-article-db:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    environment:
+      MSSQL_SA_PASSWORD: "SuperSecret7!"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - antarctica-data:/var/opt/mssql
+
+  asia-article-db:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    environment:
+      MSSQL_SA_PASSWORD: "SuperSecret7!"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - asia-data:/var/opt/mssql
+
+  australia-article-db:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    environment:
+      MSSQL_SA_PASSWORD: "SuperSecret7!"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - australia-data:/var/opt/mssql
+
+  europe-article-db:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    environment:
+      MSSQL_SA_PASSWORD: "SuperSecret7!"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - europe-data:/var/opt/mssql
+
+  global-article-db:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    environment:
+      MSSQL_SA_PASSWORD: "SuperSecret7!"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - global-data:/var/opt/mssql
+
+  north-america-article-db:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    environment:
+      MSSQL_SA_PASSWORD: "SuperSecret7!"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - north-america-data:/var/opt/mssql
+
+  south-america-article-db:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    environment:
+      MSSQL_SA_PASSWORD: "SuperSecret7!"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - south-america-data:/var/opt/mssql
+
+  infrastructure:
+    build:
+      context: .
+      dockerfile: Infrastructure/Dockerfile
+    depends_on:
+      - africa-article-db
+      - antarctica-article-db
+      - asia-article-db
+      - australia-article-db
+      - europe-article-db
+      - global-article-db
+      - north-america-article-db
+      - south-america-article-db
+
+volumes:
+  africa-data:
+  antarctica-data:
+  asia-data:
+  australia-data:
+  europe-data:
+  global-data:
+  north-america-data:
+  south-america-data:
+
+
+      
+    

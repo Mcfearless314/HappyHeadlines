@@ -1,4 +1,4 @@
-﻿namespace Application.Services;
+﻿namespace ArticleService;
 
 public class ArticleService
 {
