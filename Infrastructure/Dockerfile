@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Copy csproj and restore
 
-FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY ["Infrastructure/Infrastructure.csproj", "Infrastructure/"]
 RUN dotnet restore "Infrastructure/Infrastructure.csproj"

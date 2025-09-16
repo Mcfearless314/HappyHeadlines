@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastru
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArticleService", "ArticleService\ArticleService.csproj", "{607A4116-02BA-4459-BDC5-55646ED90E92}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProfanityService", "ProfanityService\ProfanityService.csproj", "{0FEF5235-C6DA-4DD7-B095-50C71CBD1F78}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{607A4116-02BA-4459-BDC5-55646ED90E92}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{607A4116-02BA-4459-BDC5-55646ED90E92}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{607A4116-02BA-4459-BDC5-55646ED90E92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FEF5235-C6DA-4DD7-B095-50C71CBD1F78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FEF5235-C6DA-4DD7-B095-50C71CBD1F78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FEF5235-C6DA-4DD7-B095-50C71CBD1F78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FEF5235-C6DA-4DD7-B095-50C71CBD1F78}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
