@@ -17,9 +17,29 @@ services:
       - profanity-db
     ports:
       - "5000:8080"
+        
+  comment-db:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=SuperSecret7!
+    volumes:
+      - comment-data:/var/opt/mssql
+    ports:
+      - 8003:1434
+
+  comment-service:
+    build:
+      context: .
+      dockerfile: CommentService/Dockerfile
+    depends_on:
+      - comment-db
+    ports:
+      - "5001:8081"
 
 volumes:
   profanity-data:  
+  comment-data:  
 
 
       
