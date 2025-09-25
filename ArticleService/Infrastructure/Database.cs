@@ -29,7 +29,8 @@ public class Database
             {
                 Id = reader.GetInt32(reader.GetOrdinal("Id")),
                 Title = reader.GetString(reader.GetOrdinal("Title")),
-                Content = reader.GetString(reader.GetOrdinal("Content"))
+                Content = reader.GetString(reader.GetOrdinal("Content")),
+                PublishDate = reader.GetDateTime(reader.GetOrdinal("PublishDate"))
             });
         }
 
@@ -39,32 +40,28 @@ public class Database
     public async Task<Article?> GetArticleById(int id)
     {
         Console.WriteLine($"Getting article by id: {id}");
-        using (var connection = _dbProvider.GetConnection())
+        using var connection = _dbProvider.GetConnection();
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = "SELECT Id, Title, Content, PublishDate FROM Articles WHERE Id = @Id";
+        var parameter = command.CreateParameter();
+        parameter.ParameterName = "@Id";
+        parameter.Value = id;
+        command.Parameters.Add(parameter);
+
+        using var reader = await command.ExecuteReaderAsync();
+        if (await reader.ReadAsync())
         {
-            await connection.OpenAsync();
-
-            using (var command = connection.CreateCommand())
+            return new Article
             {
-                command.CommandText = "SELECT Id, Title, Content FROM Articles WHERE Id = @Id";
-                var parameter = command.CreateParameter();
-                parameter.ParameterName = "@Id";
-                parameter.Value = id;
-                command.Parameters.Add(parameter);
-
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    if (await reader.ReadAsync())
-                    {
-                        return new Article
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Title = reader.GetString(reader.GetOrdinal("Title")),
-                            Content = reader.GetString(reader.GetOrdinal("Content"))
-                        };
-                    }
-                }
-            }
+                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                Title = reader.GetString(reader.GetOrdinal("Title")),
+                Content = reader.GetString(reader.GetOrdinal("Content")),
+                PublishDate = reader.GetDateTime(reader.GetOrdinal("PublishDate")) 
+            };
         }
+
         return null; 
     }
 }
