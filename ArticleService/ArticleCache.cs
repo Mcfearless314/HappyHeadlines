@@ -31,4 +31,12 @@ public class ArticleCache
 
         return article;
     }
+    
+    public void PreloadArticles(IEnumerable<Article> articles)
+    {
+        foreach (var article in articles)
+        {
+            _memoryCache.Set(article.Id, article, _memoryCacheDuration);
+        }
+    }
 }

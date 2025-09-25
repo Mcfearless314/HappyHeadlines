@@ -13,6 +13,7 @@ builder.Services.AddScoped<Database>();
 builder.Services.AddScoped<DbInitializer>();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ArticleCache>();
+builder.Services.AddHostedService<ArticleBackgroundService>();
 
 var app = builder.Build();
 
