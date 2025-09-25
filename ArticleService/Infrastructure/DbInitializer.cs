@@ -20,31 +20,31 @@ public class DbInitializer
             new Article { Title = "Grafana Dashboards", Content = "Visualizing metrics easily." }
         };
 
-        var connection = _dbProvider.GetConnection();
+        using var connection = _dbProvider.GetConnection();
+        connection.Open(); 
+
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+        DROP TABLE IF EXISTS Articles;
+        CREATE TABLE Articles(Id INT IDENTITY(1,1) PRIMARY KEY, Title NVARCHAR(50), Content NVARCHAR(200))";
+        command.ExecuteNonQuery();
+
+        foreach (var article in sampleArticles)
         {
-            var command = connection.CreateCommand();
-            command.CommandText = @"DROP TABLE IF EXISTS Articles;
-                    CREATE TABLE Articles(Id INT IDENTITY(1,1) PRIMARY KEY, Title NVARCHAR(50), Content NVARCHAR(200))";
-            command.ExecuteNonQuery();
-            
-            foreach (var article in sampleArticles)
-            {
-                var insertCommand = connection.CreateCommand();
-                {
-                    insertCommand.CommandText = "INSERT INTO Articles (Title, Content) VALUES (@title, @content)";
-                    var titleParam = insertCommand.CreateParameter();
-                    titleParam.ParameterName = "@title";
-                    titleParam.Value = article.Title;
-                    insertCommand.Parameters.Add(titleParam);
+            using var insertCommand = connection.CreateCommand();
+            insertCommand.CommandText = "INSERT INTO Articles (Title, Content) VALUES (@title, @content)";
 
-                    var contentParam = insertCommand.CreateParameter();
-                    contentParam.ParameterName = "@content";
-                    contentParam.Value = article.Content;
-                    insertCommand.Parameters.Add(contentParam);
+            var titleParam = insertCommand.CreateParameter();
+            titleParam.ParameterName = "@title";
+            titleParam.Value = article.Title;
+            insertCommand.Parameters.Add(titleParam);
 
-                    insertCommand.ExecuteNonQuery();
-                }
-            }
+            var contentParam = insertCommand.CreateParameter();
+            contentParam.ParameterName = "@content";
+            contentParam.Value = article.Content;
+            insertCommand.Parameters.Add(contentParam);
+
+            insertCommand.ExecuteNonQuery();
         }
     }
 }

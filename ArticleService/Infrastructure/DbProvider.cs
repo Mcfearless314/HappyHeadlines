@@ -5,16 +5,15 @@ namespace ArticleService.Infrastructure;
 
 public class DbProvider
 {
-    private DbConnection? _connection;
+    private readonly string _connectionString;
 
-    public DbConnection GetConnection()
+    public DbProvider(string connectionString)
     {
-        if (_connection == null)
-        {
-            _connection = new SqlConnection("Server=article-db;User Id=sa;Password=SuperSecret7!;TrustServerCertificate=True;");
-            _connection.Open();
-        }
+        _connectionString = connectionString;
+    }
 
-        return _connection;
+    public SqlConnection GetConnection()
+    {
+        return new SqlConnection(_connectionString);
     }
 }

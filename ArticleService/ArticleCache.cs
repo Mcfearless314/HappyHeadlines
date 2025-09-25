@@ -25,7 +25,6 @@ public class ArticleCache
 
         if (article != null)
         {
-            // Store in memory cache
             _memoryCache.Set(id, article, _memoryCacheDuration);
             Console.WriteLine("Storing article in memory cache: " + id);
         }

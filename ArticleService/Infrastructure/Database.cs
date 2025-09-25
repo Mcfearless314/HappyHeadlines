@@ -16,27 +16,23 @@ public class Database
     {
         var articles = new List<Article>();
 
-        using (var connection = _dbProvider.GetConnection())
-        {
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = "SELECT * FROM Articles";
+        await using var connection = _dbProvider.GetConnection();
+        await connection.OpenAsync();
 
-                using (var reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        var article = new Article
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Title = reader.GetString(reader.GetOrdinal("Title")),
-                            Content = reader.GetString(reader.GetOrdinal("Content"))
-                        };
-                        articles.Add(article);
-                    }
-                }
-            }
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT * FROM Articles";
+
+        await using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            articles.Add(new Article
+            {
+                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                Title = reader.GetString(reader.GetOrdinal("Title")),
+                Content = reader.GetString(reader.GetOrdinal("Content"))
+            });
         }
+
         return articles;
     }
     

@@ -4,15 +4,15 @@ using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 
-builder.Services.AddScoped<DbProvider>();
+builder.Services.AddScoped<DbProvider>(sp => new DbProvider("Server=article-db;User Id=sa;Password=SuperSecret7!;TrustServerCertificate=True;"));
 builder.Services.AddScoped<Database>();
 builder.Services.AddScoped<DbInitializer>();
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<ArticleCache>();
 
 var app = builder.Build();
 
