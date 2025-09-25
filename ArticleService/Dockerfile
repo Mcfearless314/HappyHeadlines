@@ -1,27 +1,19 @@
-﻿# Get Base Image
-
-FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+USER $APP_UID
 WORKDIR /app
 
-# Copy csproj and restore
-
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["ArticleService/ArticleService.csproj", "ArticleService/"]
 RUN dotnet restore "ArticleService/ArticleService.csproj"
-
-# Copy everything else and build
-
-COPY . ./ 
+COPY . .
 WORKDIR "/src/ArticleService"
-RUN dotnet build "ArticleService.csproj" -c Release -o /app/build
-
-# Publish
+RUN dotnet build "ArticleService.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "ArticleService.csproj" -c Release -o /app/publish /p:UseAppHost=false
-
-# Final stage/image
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "ArticleService.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
