@@ -1,4 +1,24 @@
 services:
+  
+  profanity-db:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=SuperSecret7!
+    volumes:
+      - profanity-data:/var/opt/mssql
+    ports:
+      - 8002:1433
+
+  profanity-service:
+    build:
+      context: .
+      dockerfile: ProfanityService/Dockerfile
+    depends_on:
+      - profanity-db
+    ports:
+      - "5000:8080"
+      
   article-service:
     build:
       context: .
@@ -93,3 +113,4 @@ services:
       global-data:
       north-america-data:
       south-america-data:
+      profanity-data:  

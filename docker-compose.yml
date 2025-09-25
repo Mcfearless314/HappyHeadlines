@@ -1,26 +1,23 @@
 services:
-  profanity-db:
-    image: mcr.microsoft.com/azure-sql-edge:latest
-    environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=SuperSecret7!
-    volumes:
-      - profanity-data:/var/opt/mssql
-    ports:
-      - 8002:1433
-      
-  profanity-service:
+  article-service:
     build:
       context: .
-      dockerfile: ProfanityService/Dockerfile
+      dockerfile: ArticleService/Dockerfile
     depends_on:
-      - profanity-db
+      - article-db
     ports:
       - "5000:8080"
-
+      
+  article-db:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    environment:
+      MSSQL_SA_PASSWORD: "SuperSecret7!"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - article-data:/var/opt/mssql
+  
 volumes:
-  profanity-data:  
-
+  article-data:
 
       
     
