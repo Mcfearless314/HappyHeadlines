@@ -15,9 +15,28 @@ services:
       ACCEPT_EULA: "Y"
     volumes:
       - article-data:/var/opt/mssql
-  
+        
+  comment-service:
+    build:
+      context: .
+      dockerfile: CommentService/Dockerfile
+    depends_on:
+      - comment-db
+    ports:
+      - "5001:8080"
+
+  comment-db:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    environment:
+      MSSQL_SA_PASSWORD: "SuperSecret7!"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - comment-data:/var/opt/mssql
+
+
 volumes:
   article-data:
+  comment-data:
 
       
     
