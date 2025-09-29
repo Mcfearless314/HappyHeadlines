@@ -23,7 +23,7 @@ services:
     depends_on:
       - comment-db
     ports:
-      - "5001:8081"
+      - "5001:8080"
 
   comment-db:
     image: mcr.microsoft.com/azure-sql-edge:latest
