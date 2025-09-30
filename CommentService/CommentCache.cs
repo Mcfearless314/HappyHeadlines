@@ -1,5 +1,4 @@
 ﻿using CommentService.Models;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace CommentService;
 
@@ -9,6 +8,8 @@ public class CommentCache
     private static Dictionary<int, List<Comment>?> _cachedComments = new();
     private static LinkedList<int> _lruList = new();
     private const int MaxCacheSize = 30;
+    private static int _hits = 0;
+    private static int _misses = 0;
 
     public CommentCache(Database database)
     {
@@ -27,10 +28,12 @@ public class CommentCache
             Console.WriteLine("Cached comments: " + _cachedComments.GetValueOrDefault(articleId).First().Content);
             _lruList.Remove(articleId);
             _lruList.AddFirst(articleId);
+            _hits++;
             return _cachedComments.GetValueOrDefault(articleId);
         }
 
         Console.WriteLine("Cache miss - loading from DB");
+        _misses++;
         var comments = await GetDbComments(articleId);
 
         if (comments != null)
@@ -70,5 +73,19 @@ public class CommentCache
     {
         _lruList.AddFirst(articleId);
         _cachedComments.Add(articleId, comments);
+    }
+    
+    public CommentMetrics GetMetrics()
+    {
+        var totalRequests = _hits + _misses;
+        var hitRatio = totalRequests == 0 ? 0 : (double)_hits / totalRequests;
+
+        return new CommentMetrics
+        {
+            Hits = _hits,
+            Misses = _misses,
+            LruList = _lruList,
+            CacheHitRatio = hitRatio
+        };
     }
 }
