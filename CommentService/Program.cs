@@ -1,4 +1,5 @@
 using CommentService;
+using CommentService.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddScoped<DbProvider>(sp => new DbProvider("Server=comment-db;User Id=sa;Password=SuperSecret7!;TrustServerCertificate=True;"));
 builder.Services.AddScoped<Database>();
+builder.Services.AddScoped<CommentCache>();
 builder.Services.AddScoped<DbInitializer>();
 
 var app = builder.Build();
