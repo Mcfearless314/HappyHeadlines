@@ -7,16 +7,27 @@ namespace CommentService.Controllers;
 [Route("[controller]")]
 public class CommentController : ControllerBase
 {
-    public readonly Database _database;
+    private readonly Database _database;
+    private readonly CommentCache _commentCache;
 
-    public CommentController(Database database)
+    public CommentController(Database database, CommentCache commentCache)
     {
         _database = database;
+        _commentCache = commentCache;
     }
 
-    [HttpGet("{id}")]
-    public async Task<Comment?> Get([FromRoute]int id)
+    [HttpGet]
+    public async Task<List<Comment>> Get()
     {
-        return await _database.GetCommentsByArticleId(id);
+        return await _database.GetComments();
+    }
+
+    [HttpGet("{articleId}")]
+    public async Task<List<Comment?>> Get([FromRoute] int articleId)
+    {
+        var comments = await _commentCache.GetCachedCommentsAsync(articleId);
+        return comments == null
+            ? throw new ArgumentNullException($"No comments found for this article: {articleId}")
+            : comments!;
     }
 }
