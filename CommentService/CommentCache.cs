@@ -17,6 +17,10 @@ public class CommentCache
 
     public async Task<List<Comment>?> GetCachedCommentsAsync(int articleId)
     {
+        Console.WriteLine("LRU list: " + string.Join(", ", _lruList));
+        Console.WriteLine("Cached comments keys: " + string.Join(", ", _cachedComments.Keys));
+
+
         if (_cachedComments.ContainsKey(articleId))
         {
             Console.WriteLine($"Cache hit, found comments in cache for article: {articleId}");
@@ -35,12 +39,15 @@ public class CommentCache
             {
                 Console.WriteLine("Cache full - evicting least recently used item");
                 var lruArticleId = _lruList.Last.Value;
+                Console.WriteLine($"Removing article ID: {lruArticleId}");
 
                 _lruList.RemoveLast();
                 _cachedComments.Remove(lruArticleId);
 
                 _lruList.AddFirst(articleId);
                 _cachedComments.Add(articleId, comments);
+
+                return comments;
             }
 
             Console.WriteLine($"Adding article: {articleId} to cache along with comments");

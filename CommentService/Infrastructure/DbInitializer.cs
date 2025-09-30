@@ -32,8 +32,11 @@ public class DbInitializer
                 sampleComments.Add(comment);
                 comments.Add(comment);
             }
-
-            _commentCache.PreloadComments(articleId, comments);
+            
+            if (articleId <= 30)
+            {
+                _commentCache.PreloadComments(articleId, comments);
+            }
         }
 
         using var connection = _dbProvider.GetConnection();
