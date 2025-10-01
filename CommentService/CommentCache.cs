@@ -1,4 +1,5 @@
 ﻿using CommentService.Models;
+using Prometheus;
 
 namespace CommentService;
 
@@ -10,6 +11,10 @@ public class CommentCache
     private const int MaxCacheSize = 30;
     private static int _hits = 0;
     private static int _misses = 0;
+    
+    private static readonly Counter CacheHits = Metrics.CreateCounter("comment_cache_hits_total", "Number of cache hits");
+    private static readonly Counter CacheMisses = Metrics.CreateCounter("comment_cache_misses_total", "Number of cache misses");
+    private static readonly Gauge CacheHitRatio = Metrics.CreateGauge("comment_cache_hit_ratio", "Cache hit ratio");
 
     public CommentCache(Database database)
     {
@@ -29,11 +34,15 @@ public class CommentCache
             _lruList.Remove(articleId);
             _lruList.AddFirst(articleId);
             _hits++;
+            CacheHits.Inc();
+            UpdateCacheHitRatio();
             return _cachedComments.GetValueOrDefault(articleId);
         }
 
         Console.WriteLine("Cache miss - loading from DB");
         _misses++;
+        CacheMisses.Inc();
+        UpdateCacheHitRatio();
         var comments = await GetDbComments(articleId);
 
         if (comments != null)
@@ -79,6 +88,7 @@ public class CommentCache
     {
         var totalRequests = _hits + _misses;
         var hitRatio = totalRequests == 0 ? 0 : (double)_hits / totalRequests;
+        CacheHitRatio.Set(hitRatio);
 
         return new CommentMetrics
         {
@@ -87,5 +97,12 @@ public class CommentCache
             LruList = _lruList,
             CacheHitRatio = hitRatio
         };
+    }
+    
+    private void UpdateCacheHitRatio()
+    {
+        var totalRequests = _hits + _misses;
+        var hitRatio = totalRequests == 0 ? 0 : (double)_hits / totalRequests;
+        CacheHitRatio.Set(hitRatio);
     }
 }

@@ -1,5 +1,6 @@
 using ArticleService.Model;
 using Microsoft.Extensions.Caching.Memory;
+using Prometheus;
 
 namespace ArticleService;
 
@@ -10,6 +11,10 @@ public class ArticleCache
     private static int _hits = 0;
     private static int _misses = 0;
     private static HashSet<int> _cachedArticleIds = new();
+    
+    private static readonly Counter CacheHits = Metrics.CreateCounter("article_cache_hits_total", "Number of cache hits");
+    private static readonly Counter CacheMisses = Metrics.CreateCounter("article_cache_misses_total", "Number of cache misses");
+    private static readonly Gauge CacheHitRatio = Metrics.CreateGauge("article_cache_hit_ratio", "Cache hit ratio");
 
     public ArticleCache(IMemoryCache memoryCache)
     {
@@ -22,11 +27,15 @@ public class ArticleCache
         {
             Console.WriteLine("Article found in memory cache: " + id);
             _hits++;
+            CacheHits.Inc();
+            UpdateCacheHitRatio();
             return article;
         }
         
         Console.WriteLine("Article not found in memory cache, loading from DB: " + id);
         _misses++;
+        CacheMisses.Inc();
+        UpdateCacheHitRatio();
 
         article = await factory();
 
@@ -62,6 +71,7 @@ public class ArticleCache
         List<int> cachedIds = _cachedArticleIds.ToList();
         var totalRequests = _hits + _misses;
         var hitRatio = totalRequests == 0 ? 0 : (double)_hits / totalRequests;
+        CacheHitRatio.Set(hitRatio);
         
         return new ArticleMetrics
         {
@@ -70,5 +80,12 @@ public class ArticleCache
             ArticleIdsInCache = cachedIds,
             CacheHitRatio = hitRatio
         };
+    }
+    
+    private void UpdateCacheHitRatio()
+    {
+        var totalRequests = _hits + _misses;
+        var hitRatio = totalRequests == 0 ? 0 : (double)_hits / totalRequests;
+        CacheHitRatio.Set(hitRatio);
     }
 }

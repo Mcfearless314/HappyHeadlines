@@ -63,8 +63,7 @@ public class DbInitializer
             userIdParam.ParameterName = "@userId";
             userIdParam.Value = Comment.UserId;
             insertCommand.Parameters.Add(userIdParam);
-
-
+            
             var articleIdParam = insertCommand.CreateParameter();
             articleIdParam.ParameterName = "@articleId";
             articleIdParam.Value = Comment.ArticleId;
