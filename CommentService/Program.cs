@@ -1,5 +1,6 @@
 using CommentService;
 using CommentService.Infrastructure;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,13 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.MapControllers();
+
+app.UseRouting();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapMetrics(); // Exposes /metrics
+});
 
 app.UseSwagger();
 app.UseSwaggerUI();

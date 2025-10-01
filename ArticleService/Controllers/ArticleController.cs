@@ -10,6 +10,7 @@ public class ArticleController : ControllerBase
 {
     private readonly Database _database;
     private readonly ArticleCache _articleCache;
+    
     public ArticleController(Database database, ArticleCache articleCache)
     {
         _database = database;

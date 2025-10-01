@@ -1,5 +1,6 @@
 using ArticleService.Model;
 using Microsoft.Extensions.Caching.Memory;
+using Prometheus;
 
 namespace ArticleService;
 
@@ -7,6 +8,13 @@ public class ArticleCache
 {
     private readonly IMemoryCache _memoryCache;
     private readonly TimeSpan _memoryCacheDuration = TimeSpan.FromDays(14);
+    private static int _hits = 0;
+    private static int _misses = 0;
+    private static HashSet<int> _cachedArticleIds = new();
+    
+    private static readonly Counter CacheHits = Metrics.CreateCounter("article_cache_hits_total", "Number of cache hits");
+    private static readonly Counter CacheMisses = Metrics.CreateCounter("article_cache_misses_total", "Number of cache misses");
+    private static readonly Gauge CacheHitRatio = Metrics.CreateGauge("article_cache_hit_ratio", "Cache hit ratio");
 
     public ArticleCache(IMemoryCache memoryCache)
     {
@@ -18,14 +26,23 @@ public class ArticleCache
         if (_memoryCache.TryGetValue(id, out Article? article))
         {
             Console.WriteLine("Article found in memory cache: " + id);
+            _hits++;
+            CacheHits.Inc();
+            UpdateCacheHitRatio();
             return article;
         }
+        
+        Console.WriteLine("Article not found in memory cache, loading from DB: " + id);
+        _misses++;
+        CacheMisses.Inc();
+        UpdateCacheHitRatio();
 
         article = await factory();
 
         if (article != null)
         {
             _memoryCache.Set(id, article, _memoryCacheDuration);
+            _cachedArticleIds.Add(id);
             Console.WriteLine("Storing article in memory cache: " + id);
         }
 
@@ -36,7 +53,39 @@ public class ArticleCache
     {
         foreach (var article in articles)
         {
-            _memoryCache.Set(article.Id, article, _memoryCacheDuration);
+            if (_memoryCache.TryGetValue(article.Id, out _))
+            {
+                Console.WriteLine("Article already in cache, skipping: " + article.Id);
+            }
+            else
+            {
+                _memoryCache.Set(article.Id, article, _memoryCacheDuration);
+                _cachedArticleIds.Add(article.Id);
+                Console.WriteLine("Preloading article into cache: " + article.Id);
+            }
         }
+    }
+
+    public ArticleMetrics GetMetrics()
+    {
+        List<int> cachedIds = _cachedArticleIds.ToList();
+        var totalRequests = _hits + _misses;
+        var hitRatio = totalRequests == 0 ? 0 : (double)_hits / totalRequests;
+        CacheHitRatio.Set(hitRatio);
+        
+        return new ArticleMetrics
+        {
+            Hits = _hits,
+            Misses = _misses,
+            ArticleIdsInCache = cachedIds,
+            CacheHitRatio = hitRatio
+        };
+    }
+    
+    private void UpdateCacheHitRatio()
+    {
+        var totalRequests = _hits + _misses;
+        var hitRatio = totalRequests == 0 ? 0 : (double)_hits / totalRequests;
+        CacheHitRatio.Set(hitRatio);
     }
 }
