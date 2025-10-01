@@ -24,8 +24,6 @@ public class ArticleBackgroundService : BackgroundService
                     .Where(a => a.PublishDate >= DateTime.Today.AddDays(-14));
 
                 _articleCache.PreloadArticles(recentArticles);
-
-                Console.WriteLine($"Preloaded {recentArticles.Count()} articles");
             }
             catch (Exception ex)
             {

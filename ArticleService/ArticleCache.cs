@@ -9,6 +9,7 @@ public class ArticleCache
     private readonly TimeSpan _memoryCacheDuration = TimeSpan.FromDays(14);
     private static int _hits = 0;
     private static int _misses = 0;
+    private static HashSet<int> _cachedArticleIds = new();
 
     public ArticleCache(IMemoryCache memoryCache)
     {
@@ -32,6 +33,7 @@ public class ArticleCache
         if (article != null)
         {
             _memoryCache.Set(id, article, _memoryCacheDuration);
+            _cachedArticleIds.Add(id);
             Console.WriteLine("Storing article in memory cache: " + id);
         }
 
@@ -42,12 +44,22 @@ public class ArticleCache
     {
         foreach (var article in articles)
         {
-            _memoryCache.Set(article.Id, article, _memoryCacheDuration);
+            if (_memoryCache.TryGetValue(article.Id, out _))
+            {
+                Console.WriteLine("Article already in cache, skipping: " + article.Id);
+            }
+            else
+            {
+                _memoryCache.Set(article.Id, article, _memoryCacheDuration);
+                _cachedArticleIds.Add(article.Id);
+                Console.WriteLine("Preloading article into cache: " + article.Id);
+            }
         }
     }
 
     public ArticleMetrics GetMetrics()
     {
+        List<int> cachedIds = _cachedArticleIds.ToList();
         var totalRequests = _hits + _misses;
         var hitRatio = totalRequests == 0 ? 0 : (double)_hits / totalRequests;
         
@@ -55,6 +67,7 @@ public class ArticleCache
         {
             Hits = _hits,
             Misses = _misses,
+            ArticleIdsInCache = cachedIds,
             CacheHitRatio = hitRatio
         };
     }
