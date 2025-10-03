@@ -103,6 +103,7 @@ public class CommentCache
     {
         var totalRequests = _hits + _misses;
         var hitRatio = totalRequests == 0 ? 0 : (double)_hits / totalRequests;
+        hitRatio = hitRatio * 100;
         CacheHitRatio.Set(hitRatio);
     }
 }
