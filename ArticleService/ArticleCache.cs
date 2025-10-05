@@ -8,8 +8,6 @@ public class ArticleCache
 {
     private readonly IMemoryCache _memoryCache;
     private readonly TimeSpan _memoryCacheDuration = TimeSpan.FromDays(14);
-    private static int _hits = 0;
-    private static int _misses = 0;
     private static HashSet<int> _cachedArticleIds = new();
     
     private static readonly Counter CacheHits = Metrics.CreateCounter("article_cache_hits_total", "Number of cache hits");
@@ -26,14 +24,12 @@ public class ArticleCache
         if (_memoryCache.TryGetValue(id, out Article? article))
         {
             Console.WriteLine("Article found in memory cache: " + id);
-            _hits++;
             CacheHits.Inc();
             UpdateCacheHitRatio();
             return article;
         }
         
         Console.WriteLine("Article not found in memory cache, loading from DB: " + id);
-        _misses++;
         CacheMisses.Inc();
         UpdateCacheHitRatio();
 
@@ -69,14 +65,14 @@ public class ArticleCache
     public ArticleMetrics GetMetrics()
     {
         List<int> cachedIds = _cachedArticleIds.ToList();
-        var totalRequests = _hits + _misses;
-        var hitRatio = totalRequests == 0 ? 0 : (double)_hits / totalRequests;
+        var totalRequests = CacheHits.Value + CacheMisses.Value;
+        var hitRatio = totalRequests == 0 ? 0 : CacheHits.Value / totalRequests;
         CacheHitRatio.Set(hitRatio);
         
         return new ArticleMetrics
         {
-            Hits = _hits,
-            Misses = _misses,
+            Hits = CacheHits.Value,
+            Misses = CacheMisses.Value,
             ArticleIdsInCache = cachedIds,
             CacheHitRatio = hitRatio
         };
@@ -84,8 +80,8 @@ public class ArticleCache
     
     private void UpdateCacheHitRatio()
     {
-        var totalRequests = _hits + _misses;
-        var hitRatio = totalRequests == 0 ? 0 : (double)_hits / totalRequests;
+        var totalRequests = CacheHits.Value + CacheMisses.Value;
+        var hitRatio = totalRequests == 0 ? 0 : CacheHits.Value / totalRequests;
         hitRatio = hitRatio * 100;
         CacheHitRatio.Set(hitRatio);
     }

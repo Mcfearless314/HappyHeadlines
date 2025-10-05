@@ -9,8 +9,7 @@ public class CommentCache
     private static Dictionary<int, List<Comment>?> _cachedComments = new();
     private static LinkedList<int> _lruList = new();
     private const int MaxCacheSize = 30;
-    private static int _hits = 0;
-    private static int _misses = 0;
+
     
     private static readonly Counter CacheHits = Metrics.CreateCounter("comment_cache_hits_total", "Number of cache hits");
     private static readonly Counter CacheMisses = Metrics.CreateCounter("comment_cache_misses_total", "Number of cache misses");
@@ -33,14 +32,12 @@ public class CommentCache
             Console.WriteLine("Cached comments: " + _cachedComments.GetValueOrDefault(articleId).First().Content);
             _lruList.Remove(articleId);
             _lruList.AddFirst(articleId);
-            _hits++;
             CacheHits.Inc();
             UpdateCacheHitRatio();
             return _cachedComments.GetValueOrDefault(articleId);
         }
 
         Console.WriteLine("Cache miss - loading from DB");
-        _misses++;
         CacheMisses.Inc();
         UpdateCacheHitRatio();
         var comments = await GetDbComments(articleId);
@@ -86,14 +83,14 @@ public class CommentCache
     
     public CommentMetrics GetMetrics()
     {
-        var totalRequests = _hits + _misses;
-        var hitRatio = totalRequests == 0 ? 0 : (double)_hits / totalRequests;
+        var totalRequests = CacheHits.Value + CacheMisses.Value;
+        var hitRatio = totalRequests == 0 ? 0 : CacheHits.Value / totalRequests;
         CacheHitRatio.Set(hitRatio);
 
         return new CommentMetrics
         {
-            Hits = _hits,
-            Misses = _misses,
+            Hits = CacheHits.Value,
+            Misses = CacheMisses.Value,
             LruList = _lruList,
             CacheHitRatio = hitRatio
         };
@@ -101,8 +98,8 @@ public class CommentCache
     
     private void UpdateCacheHitRatio()
     {
-        var totalRequests = _hits + _misses;
-        var hitRatio = totalRequests == 0 ? 0 : (double)_hits / totalRequests;
+        var totalRequests = CacheHits.Value + CacheMisses.Value;
+        var hitRatio = totalRequests == 0 ? 0 : CacheHits.Value / totalRequests;
         hitRatio = hitRatio * 100;
         CacheHitRatio.Set(hitRatio);
     }
