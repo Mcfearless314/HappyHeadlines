@@ -1,5 +1,6 @@
 using ArticleService.Infrastructure;
 using ArticleService.Model;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ArticleService.Controllers;
@@ -24,6 +25,7 @@ public class ArticleController : ControllerBase
     }
     
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<Article?> Get([FromRoute]int id)
     {
         return await _articleCache.GetArticleAsync(id, () => _database.GetArticleById(id));

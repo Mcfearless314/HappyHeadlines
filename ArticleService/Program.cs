@@ -15,6 +15,7 @@ builder.Services.AddScoped<DbInitializer>();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ArticleCache>();
 builder.Services.AddHostedService<ArticleBackgroundService>();
+builder.Services.AddHostedService<ArticleCacheBackgroundService>();
 
 var app = builder.Build();
 

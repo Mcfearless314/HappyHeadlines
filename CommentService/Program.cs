@@ -12,6 +12,7 @@ builder.Services.AddScoped<DbProvider>(sp => new DbProvider("Server=comment-db;U
 builder.Services.AddScoped<Database>();
 builder.Services.AddScoped<CommentCache>();
 builder.Services.AddScoped<DbInitializer>();
+builder.Services.AddHostedService<CommentCacheBackgroundService>();
 
 var app = builder.Build();
 
