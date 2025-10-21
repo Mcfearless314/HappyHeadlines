@@ -26,6 +26,7 @@ jobs:
 
       - name: Build and push Article Service
         run: |
+          USERNAME=$(echo "${{ secrets.GHCR_USERNAME }}" | tr '[:upper:]' '[:lower:]')
           IMAGE_NAME=ghcr.io/${{ secrets.GHCR_USERNAME }}/article-service
           docker build -t $IMAGE_NAME:${{ env.VERSION }} -f ArticleService/Dockerfile .
           docker push $IMAGE_NAME:${{ env.VERSION }}
@@ -34,6 +35,7 @@ jobs:
 
       - name: Build and push Comment Service
         run: |
+          USERNAME=$(echo "${{ secrets.GHCR_USERNAME }}" | tr '[:upper:]' '[:lower:]')
           IMAGE_NAME=ghcr.io/${{ secrets.GHCR_USERNAME }}/comment-service
           docker build -t $IMAGE_NAME:${{ env.VERSION }} -f CommentService/Dockerfile .
           docker push $IMAGE_NAME:${{ env.VERSION }}
