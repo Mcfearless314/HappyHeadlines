@@ -1,0 +1,17 @@
+﻿name: DevOps Pipeline
+
+on:
+  push:
+    branches:
+      - master
+        
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Build Application
+        run: |
+          echo "Building the application..."
