@@ -8,10 +8,34 @@ on:
 jobs:
   integration:
     runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      packages: write
+    
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      
-      - name: Build Application
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GHCR_SECRET }}" | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+
+      - name: Set version variable
+        id: vars
+        run: echo "VERSION=$(date +%Y.%m.%d)-${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
+
+      - name: Build and push Article Service
         run: |
-          echo "Building the application..."
+          IMAGE_NAME=ghcr.io/${{ secrets.GHCR_USERNAME }}/article-service
+          docker build -t $IMAGE_NAME:${{ env.VERSION }} -f ArticleService/Dockerfile .
+          docker push $IMAGE_NAME:${{ env.VERSION }}
+          docker tag $IMAGE_NAME:${{ env.VERSION }} $IMAGE_NAME:latest
+          docker push $IMAGE_NAME:latest
+
+      - name: Build and push Comment Service
+        run: |
+          IMAGE_NAME=ghcr.io/${{ secrets.GHCR_USERNAME }}/comment-service
+          docker build -t $IMAGE_NAME:${{ env.VERSION }} -f CommentService/Dockerfile .
+          docker push $IMAGE_NAME:${{ env.VERSION }}
+          docker tag $IMAGE_NAME:${{ env.VERSION }} $IMAGE_NAME:latest
+          docker push $IMAGE_NAME:latest
