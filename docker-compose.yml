@@ -3,10 +3,13 @@ services:
     build:
       context: .
       dockerfile: ArticleService/Dockerfile
+    image: article-service:latest
     depends_on:
       - article-db
-    ports:
+    ports: 
       - "5000:8080"
+    deploy:
+      replicas: 3
       
   article-db:
     image: mcr.microsoft.com/azure-sql-edge:latest
@@ -15,11 +18,12 @@ services:
       ACCEPT_EULA: "Y"
     volumes:
       - article-data:/var/opt/mssql
-        
+      
   comment-service:
     build:
       context: .
       dockerfile: CommentService/Dockerfile
+    image: comment-service:latest
     depends_on:
       - comment-db
     ports:
