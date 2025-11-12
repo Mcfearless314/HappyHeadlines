@@ -54,6 +54,24 @@ services:
       ACCEPT_EULA: "Y"
     volumes:
       - profanity-data:/var/opt/mssql
+      
+  publisher-service:
+    build:
+      context: .
+      dockerfile: PublisherService/Dockerfile
+    image: publisher-service:latest
+    depends_on:
+      - publisher-db
+    ports:
+      - "5003:8080"
+
+  publisher-db:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    environment:
+      MSSQL_SA_PASSWORD: "SuperSecret7!"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - publisher-data:/var/opt/mssql
         
   # Prometheus service
   prometheus:
@@ -82,6 +100,7 @@ volumes:
   article-data:
   comment-data:
   profanity-data:
+  publisher-data:
   grafana-data:
 
       
