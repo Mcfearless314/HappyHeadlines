@@ -13,14 +13,15 @@ public class ProfanityController : ControllerBase
     }
     
     [HttpGet]
-    public void Get()
+    public IActionResult Get()
     {
-        _database.GetProfanityWords();
+        var profanityWords = _database.GetProfanityWords();
+        return Ok(profanityWords);
     }
 
     [HttpGet("check")]
-    public bool CheckProfanity([FromQuery] string text)
+    public async Task<bool> CheckProfanity([FromQuery] string text)
     {
-        return _database.ContainsProfanity(text);
+        return await _database.ContainsProfanityAsync(text);
     }
 }

@@ -25,16 +25,18 @@ public class Database
         return words;
     }
 
-    public bool ContainsProfanity(string text)
+    public async Task<bool> ContainsProfanityAsync(string text)
     {
         var connection = _dbProvider.GetConnection();
         var command = connection.CreateCommand();
-        command.CommandText = "SELECT COUNT(1) FROM ProfanityWords WHERE @text LIKE '%' + Word + '%'";
+        command.CommandText = "SELECT COUNT(1) FROM ProfanityWords WHERE CHARINDEX(Word, @text) > 0";
+
         var param = command.CreateParameter();
         param.ParameterName = "@text";
         param.Value = text;
         command.Parameters.Add(param);
 
-        return (int)command.ExecuteScalar() > 0;
+        var result = await command.ExecuteScalarAsync();
+        return Convert.ToInt32(result) > 0;
     }
 }
