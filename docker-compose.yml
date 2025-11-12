@@ -36,6 +36,24 @@ services:
       ACCEPT_EULA: "Y"
     volumes:
       - comment-data:/var/opt/mssql
+      
+  profanity-service:
+    build:
+      context: .
+      dockerfile: ProfanityService/Dockerfile
+    image: profanity-service:latest
+    depends_on:
+      - profanity-db
+    ports:
+      - "5002:8080"
+      
+  profanity-db:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    environment:
+      MSSQL_SA_PASSWORD: "SuperSecret7!"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - profanity-data:/var/opt/mssql
         
   # Prometheus service
   prometheus:
@@ -63,6 +81,7 @@ services:
 volumes:
   article-data:
   comment-data:
+  profanity-data:
   grafana-data:
 
       
