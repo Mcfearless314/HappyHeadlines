@@ -36,6 +36,40 @@ public class Database
 
         return articles;
     }
+    
+    public async Task<List<Article>> GetArticlesWithPagination(int pageNumber, int pageSize)
+    {
+        var articles = new List<Article>();
+
+        var connection = _dbProvider.GetConnection();
+        await connection.OpenAsync();
+
+        var command = connection.CreateCommand();
+        command.CommandText = @"
+        SELECT *
+        FROM Articles
+        ORDER BY PublishDate DESC
+        OFFSET @Offset ROWS
+        FETCH NEXT @PageSize ROWS ONLY";
+
+        command.Parameters.AddWithValue("@Offset", (pageNumber - 1) * pageSize);
+        command.Parameters.AddWithValue("@PageSize", pageSize);
+
+        var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            articles.Add(new Article
+            {
+                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                Title = reader.GetString(reader.GetOrdinal("Title")),
+                Content = reader.GetString(reader.GetOrdinal("Content")),
+                PublishDate = reader.GetDateTime(reader.GetOrdinal("PublishDate"))
+            });
+        }
+
+        return articles;
+    }
+
 
     public async Task<Article?> GetArticleById(int id)
     {
