@@ -1,6 +1,7 @@
 using ArticleService;
 using ArticleService.Infrastructure;
-using Microsoft.AspNetCore.Mvc;
+using ArticleService.Messaging;
+using EasyNetQ;
 using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,8 +15,30 @@ builder.Services.AddScoped<Database>();
 builder.Services.AddScoped<DbInitializer>();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ArticleCache>();
-builder.Services.AddHostedService<ArticleBackgroundService>();
-builder.Services.AddHostedService<ArticleCacheBackgroundService>();
+//builder.Services.AddHostedService<ArticleBackgroundService>();
+//builder.Services.AddHostedService<ArticleCacheBackgroundService>();
+builder.Services.AddHostedService<ArticleQueueBackgroundService>();
+builder.Services.AddScoped<MessageClient>();
+
+builder.Services.AddSingleton<IBus>(sp =>
+{
+    for (int i = 0; i < 10; i++)
+    {
+        try
+        {
+            var bus = RabbitHutch.CreateBus("host=rmq;virtualHost=/;username=guest;password=guest");
+            Console.WriteLine($"EasyNetQ connected to rabbitmq on attempt {i+1}");
+            return bus;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to connect to RabbitMQ: {ex.Message}");
+            Thread.Sleep(5000);
+        }
+    }
+
+    throw new Exception("Could not connect to RabbitMQ after multiple attempts.");
+});
 
 var app = builder.Build();
 

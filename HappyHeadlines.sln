@@ -14,6 +14,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArticleService", "ArticleSe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommentService", "CommentService\CommentService.csproj", "{91916615-733C-4DD0-897C-8A7B0342F996}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublisherService", "PublisherService\PublisherService.csproj", "{5B31B6C7-D7C6-4B4E-B1B4-1B26CD58B91B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonitorService", "MonitorService\MonitorService.csproj", "{FDF39110-9F74-469C-8F71-DB2A4C8A48EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +52,13 @@ Global
 		{91916615-733C-4DD0-897C-8A7B0342F996}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91916615-733C-4DD0-897C-8A7B0342F996}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91916615-733C-4DD0-897C-8A7B0342F996}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B31B6C7-D7C6-4B4E-B1B4-1B26CD58B91B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B31B6C7-D7C6-4B4E-B1B4-1B26CD58B91B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B31B6C7-D7C6-4B4E-B1B4-1B26CD58B91B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B31B6C7-D7C6-4B4E-B1B4-1B26CD58B91B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDF39110-9F74-469C-8F71-DB2A4C8A48EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDF39110-9F74-469C-8F71-DB2A4C8A48EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDF39110-9F74-469C-8F71-DB2A4C8A48EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDF39110-9F74-469C-8F71-DB2A4C8A48EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
