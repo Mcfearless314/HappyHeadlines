@@ -96,6 +96,6 @@ public class Database
         command.Parameters.Add(pPublishDate);
 
         await command.ExecuteNonQueryAsync();
-
+        
     }
 }

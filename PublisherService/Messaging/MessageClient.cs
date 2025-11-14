@@ -2,6 +2,7 @@ using EasyNetQ;
 using EasyNetQ.Serialization.NewtonsoftJson;
 using EasyNetQ.Topology;
 using Newtonsoft.Json;
+using PublisherService.Contracts;
 using Serilog.Sinks.File;
 
 namespace PublisherService.Messaging;
@@ -15,27 +16,20 @@ public class MessageClient
         _bus = bus;
     }
 
-    public async Task PublishAsync<T>(T @event, string? queueName = null) where T : class
+    public async Task PublishAsync(Article article, MessageProperties properties, string? queueName = null)
     {
-        var properties = new MessageProperties();
-        var message = new Message<T>(@event, properties);
+        var json = JsonConvert.SerializeObject(article);
+        var message = new Message<string>(json, properties);
 
         var defaultExchange = new Exchange(string.Empty);
 
-        if (!string.IsNullOrEmpty(queueName))
-        {
-            var advanced = _bus.Advanced;
-            var queue = await advanced.QueueDeclareAsync(queueName);
-            await advanced.PublishAsync(
-                exchange: defaultExchange,
-                routingKey: queue.Name,
-                mandatory: true,
-                message: message);
-        }
-        else
-        {
-            await _bus.PubSub.PublishAsync(@event);
-        }
+        var advanced = _bus.Advanced;
+        var queue = await advanced.QueueDeclareAsync(queueName);
+        await advanced.PublishAsync(
+            exchange: defaultExchange,
+            routingKey: queue.Name,
+            mandatory: true,
+            message: message);
     }
 
     public async Task SubscribeAsync<T>(string subscriptionId, Func<T, Task> onMessage,

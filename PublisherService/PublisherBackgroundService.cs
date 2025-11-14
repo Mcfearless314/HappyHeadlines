@@ -11,7 +11,7 @@ namespace PublisherService;
 public class PublisherBackgroundService : BackgroundService
 {
     private readonly MessageClient _messageClient;
-    private int _counter = 1;
+    private int _counter = 7;
     private readonly TimeSpan _interval = TimeSpan.FromSeconds(10);
 
     public PublisherBackgroundService(MessageClient messageClient)
@@ -51,11 +51,9 @@ public class PublisherBackgroundService : BackgroundService
                     props.Headers[key] = value;  
                 });
 
-            var message = new Message<Article>(article, properties);
-
             try
             {
-                await _messageClient.PublishAsync(message, queueName:"article-queue");
+                await _messageClient.PublishAsync(article, properties, queueName:"article-queue");
                 MonitorService.MonitorService.Log.Debug($"Published article {_counter}");
                 _counter++;
             }

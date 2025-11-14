@@ -24,15 +24,14 @@ public class ArticleQueueBackgroundService : BackgroundService
         try
         {
             await _messageClient.SubscribeAsync<Article>(
-    "article-queue",
-    raw =>
-    {
-        Console.WriteLine("[Debug] Raw message received:");
-        Console.WriteLine(raw);
+                "article-queue",
+                raw =>
+                {
+                    Console.WriteLine("[Debug] Raw message received:");
+                    Console.WriteLine(raw);
                     return HandleArticleEvent(raw);
-    },
-    stoppingToken
-);
+                }
+            );
 
 
             Console.WriteLine("[Subscriber] Subscription established.");
@@ -50,7 +49,7 @@ public class ArticleQueueBackgroundService : BackgroundService
                 return;
             }
         }
-        
+
         try
         {
             await Task.Delay(Timeout.Infinite, stoppingToken);

@@ -27,10 +27,10 @@ public class MessageClient
         using var advanced = _bus.Advanced;
         var queue = await advanced.QueueDeclareAsync(queueName);
 
-        async Task Handler(IMessage<Message<T>> msg, MessageReceivedInfo info)
+
+        advanced.Consume<string>(queue, async (msg, info) =>
         {
-            Console.WriteLine("Deliverytag: " + info.DeliveryTag);
-            Console.WriteLine("Message Type: " + msg.Body.MessageType);
+            Console.WriteLine("Recieved raw JSON message");
 
             var headers = msg.Properties.Headers;
             var propagator = new TraceContextPropagator();
@@ -43,9 +43,13 @@ public class MessageClient
             using var activity = MonitorService.MonitorService.ActivitySource.StartActivity("Consumed Article",
                 ActivityKind.Consumer, parentContext.ActivityContext);
 
-            await onMessage(msg.Body.Body);
-        }
+            var obj = JsonConvert.DeserializeObject<T>(msg.Body);
+            if (obj == null)
+                throw new InvalidOperationException("Failed to deserialize JSON to type " + typeof(T).Name);
+            
+            await onMessage(obj);
+        });
 
-        advanced.Consume(queue, (Func<IMessage<Message<T>>, MessageReceivedInfo, Task>)Handler);
+
     }
 }
