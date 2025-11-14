@@ -1,4 +1,6 @@
-using PublisherService.Infrastructure;
+using EasyNetQ;
+using PublisherService;
+using PublisherService.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,22 +8,32 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddControllers();
+builder.Services.AddScoped<MessageClient>();
+builder.Services.AddHostedService<PublisherBackgroundService>();
 
-builder.Services.AddScoped<DbProvider>(sp => new DbProvider("Server=publisher-db;User Id=sa;Password=SuperSecret7!;TrustServerCertificate=True;"));
-builder.Services.AddScoped<Database>();
-builder.Services.AddScoped<DbInitializer>();
+builder.Services.AddSingleton<IBus>(sp =>
+{
+    for (int i = 0; i < 10; i++)
+    {
+        try
+        {
+            var bus = RabbitHutch.CreateBus("host=rmq;virtualHost=/;username=guest;password=guest");
+            Console.WriteLine($"EasyNetQ connected to rabbitmq on attempt {i+1}");
+            return bus;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to connect to RabbitMQ: {ex.Message}");
+            Thread.Sleep(5000);
+        }
+    }
+
+    throw new Exception("Could not connect to RabbitMQ after multiple attempts.");
+});
+
+
 
 var app = builder.Build();
-
-using (var scope = app.Services.CreateScope())
-{
-    var initializer = scope.ServiceProvider.GetRequiredService<DbInitializer>();
-    initializer.Initialize();
-}
-
-app.MapControllers();
-
 
 app.UseSwagger();
 app.UseSwaggerUI();

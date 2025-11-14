@@ -1,4 +1,4 @@
-namespace PublisherService.Models;
+namespace PublisherService.Contracts;
 
 public class Article
 {

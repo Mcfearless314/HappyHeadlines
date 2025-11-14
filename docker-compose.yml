@@ -5,11 +5,12 @@ services:
       dockerfile: ArticleService/Dockerfile
     image: article-service:latest
     depends_on:
-      - article-db
+      article-db:
+        condition: service_started
+      rmq:
+        condition: service_healthy
     ports: 
       - "5000:8080"
-    deploy:
-      replicas: 3
       
   article-db:
     image: mcr.microsoft.com/azure-sql-edge:latest
@@ -61,18 +62,9 @@ services:
       dockerfile: PublisherService/Dockerfile
     image: publisher-service:latest
     depends_on:
-      - publisher-db
-    ports:
-      - "5003:8080"
-
-  publisher-db:
-    image: mcr.microsoft.com/azure-sql-edge:latest
-    environment:
-      MSSQL_SA_PASSWORD: "SuperSecret7!"
-      ACCEPT_EULA: "Y"
-    volumes:
-      - publisher-data:/var/opt/mssql
-        
+      rmq:
+        condition: service_healthy
+          
   # Prometheus service
   prometheus:
     image: prom/prometheus:latest
@@ -95,13 +87,60 @@ services:
       - prometheus
     volumes:
         - grafana-data:/var/lib/grafana
+  
+  seq:
+    image: datalust/seq
+    ports: 
+      - 5341:5341
+      - 5342:80
+    volumes:
+      - rps_seq_data:/data
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_PASSWORD=admin
+      - SEQ_USER=admin
+      
+  zipkin:
+    image: openzipkin/zipkin
+    ports:
+      - 9411:9411
+    environment:
+      - STORAGE_TYPE=mysql
+      - MYSQL_HOST=zipkin-storage
+      - MYSQL_USER=zipkin
+      - MYSQL_PASS=zipkin
+    depends_on:
+      - zipkin-storage
+      
+  zipkin-storage:
+    image: openzipkin/zipkin-mysql
+    ports:
+      - 3306:3306
+    volumes:
+      - zipkin_data:/mysql/data
+          
+  rmq:
+    image: rabbitmq:3-management
+    container_name: rmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "check_running" ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
 
 volumes:
   article-data:
   comment-data:
   profanity-data:
-  publisher-data:
   grafana-data:
+  rps_seq_data:
+  zipkin_data:
 
       
     

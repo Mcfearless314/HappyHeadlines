@@ -6,6 +6,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["PublisherService/PublisherService.csproj", "PublisherService/"]
+COPY ["MonitorService/MonitorService.csproj", "MonitorService/"]
 RUN dotnet restore "PublisherService/PublisherService.csproj"
 COPY . .
 WORKDIR "/src/PublisherService"
