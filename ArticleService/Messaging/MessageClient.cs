@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using ArticleService.Model;
 using EasyNetQ;
 using Newtonsoft.Json;
@@ -27,18 +28,37 @@ public class MessageClient
         using var advanced = _bus.Advanced;
         var queue = await advanced.QueueDeclareAsync(queueName);
 
-
         advanced.Consume<string>(queue, async (msg, info) =>
         {
             Console.WriteLine("Recieved raw JSON message");
 
             var headers = msg.Properties.Headers;
             var propagator = new TraceContextPropagator();
-            var parentContext = propagator.Extract(default, headers,
-                (r, key) =>
+            
+            IEnumerable<string> Getter(IDictionary<string, object> carrier, string key)
+            {
+                if (carrier.TryGetValue(key, out var value) && value != null)
                 {
-                    return new List<string>(new[] { r.ContainsKey(key) ? r[key].ToString() : String.Empty }!);
-                });
+                    if (value is byte[] bytes)
+                    {
+                        var s = Encoding.UTF8.GetString(bytes);
+                        Console.WriteLine($"Header {key}: {s}");
+                        return new[] { s };
+                    }
+
+                    Console.WriteLine($"Header {key}: {value}");
+                    return new[] { value.ToString()! };
+                }
+                
+                return Array.Empty<string>();
+            }
+            
+            var parentContext = propagator.Extract(
+                default,
+                headers,
+                Getter
+            );
+
             Baggage.Current = parentContext.Baggage;
             using var activity = MonitorService.MonitorService.ActivitySource.StartActivity("Consumed Article",
                 ActivityKind.Consumer, parentContext.ActivityContext);
@@ -46,10 +66,8 @@ public class MessageClient
             var obj = JsonConvert.DeserializeObject<T>(msg.Body);
             if (obj == null)
                 throw new InvalidOperationException("Failed to deserialize JSON to type " + typeof(T).Name);
-            
+
             await onMessage(obj);
         });
-
-
     }
 }

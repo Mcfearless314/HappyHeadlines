@@ -27,18 +27,17 @@ public class ArticleQueueBackgroundService : BackgroundService
                 "article-queue",
                 raw =>
                 {
-                    Console.WriteLine("[Debug] Raw message received:");
-                    Console.WriteLine(raw);
+                    MonitorService.MonitorService.Log.Debug("[Subscriber] Received article event from queue.");
                     return HandleArticleEvent(raw);
                 }
             );
 
 
-            Console.WriteLine("[Subscriber] Subscription established.");
+            MonitorService.MonitorService.Log.Information("[Subscriber] Subscription established.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[Subscriber] Subscription failed: {ex.Message}. Retrying...");
+            MonitorService.MonitorService.Log.Error($"[Subscriber] Subscription failed: {ex.Message}. Retrying...");
 
             try
             {
@@ -65,11 +64,8 @@ public class ArticleQueueBackgroundService : BackgroundService
 
     private async Task HandleArticleEvent(Article article)
     {
-        Console.WriteLine($"Received Article: {article.Id} - {article.Title}");
-        Console.WriteLine($"Content: {article.Content}");
-        Console.WriteLine($"Publish Date: {article.PublishDate}");
-
-
+        MonitorService.MonitorService.Log.Debug($"[Handler] Handling article: {article.Id} from queue.");
+        
         var articleExists = await _database.GetArticleById(article.Id);
 
         if (articleExists == null)
@@ -78,7 +74,7 @@ public class ArticleQueueBackgroundService : BackgroundService
         }
         else
         {
-            Console.WriteLine($"Article: {article.Id} already exists in the database, skipping...");
+            MonitorService.MonitorService.Log.Debug($"Article: {article.Id} already exists in the database, skipping...");
         }
     }
 }

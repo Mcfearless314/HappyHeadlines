@@ -65,7 +65,6 @@ services:
       rmq:
         condition: service_healthy
           
-  # Prometheus service
   prometheus:
     image: prom/prometheus:latest
     volumes:
@@ -78,7 +77,6 @@ services:
       - article-service
       - comment-service
 
-  # Grafana service
   grafana:
     image: grafana/grafana:latest
     ports:
@@ -94,7 +92,7 @@ services:
       - 5341:5341
       - 5342:80
     volumes:
-      - rps_seq_data:/data
+      - rps_seq_data1:/data
     environment:
       - ACCEPT_EULA=Y
       - SEQ_PASSWORD=admin
@@ -104,20 +102,20 @@ services:
     image: openzipkin/zipkin
     ports:
       - 9411:9411
-    environment:
-      - STORAGE_TYPE=mysql
-      - MYSQL_HOST=zipkin-storage
-      - MYSQL_USER=zipkin
-      - MYSQL_PASS=zipkin
-    depends_on:
-      - zipkin-storage
+#    environment:
+#      - STORAGE_TYPE=mysql
+#      - MYSQL_HOST=zipkin-storage
+#      - MYSQL_USER=zipkin
+#      - MYSQL_PASS=zipkin
+#    depends_on:
+#      - zipkin-storage
       
-  zipkin-storage:
-    image: openzipkin/zipkin-mysql
-    ports:
-      - 3306:3306
-    volumes:
-      - zipkin_data:/mysql/data
+#  zipkin-storage:
+#    image: openzipkin/zipkin-mysql
+#    ports:
+#      - 3306:3306
+#    volumes:
+#      - zipkin_data:/mysql/data
           
   rmq:
     image: rabbitmq:3-management
@@ -139,8 +137,8 @@ volumes:
   comment-data:
   profanity-data:
   grafana-data:
-  rps_seq_data:
-  zipkin_data:
+  rps_seq_data1:
+#  zipkin_data:
 
       
     

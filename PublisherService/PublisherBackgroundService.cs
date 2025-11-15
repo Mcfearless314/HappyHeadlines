@@ -21,55 +21,54 @@ public class PublisherBackgroundService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        using var activity = MonitorService.MonitorService.ActivitySource.StartActivity();
         MonitorService.MonitorService.Log.Debug("[PublisherService] Background worker started.");
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            using var activity = MonitorService.MonitorService.ActivitySource.StartActivity();
-
-
-            var article = new Article
+            for (int i = _counter; i < 8; i++)
             {
-                Id = _counter,
-                Title = $"This is article title {_counter}",
-                Content = $"This is content {_counter}",
-                PublishDate = DateTime.Today.AddDays(_counter)
-            };
-            
-
-            var activityContext = activity?.Context ?? Activity.Current?.Context ?? default;
-            var propagationContext = new PropagationContext(activityContext, Baggage.Current);
-            var propagator = new TraceContextPropagator();
-
-            var properties = new MessageProperties();
-
-            propagator.Inject(
-                propagationContext,
-                properties,
-                (props, key, value) =>
+                var article = new Article
                 {
-                    props.Headers[key] = value;  
-                });
+                    Id = _counter,
+                    Title = $"This is article title {_counter}",
+                    Content = $"This is content {_counter}",
+                    PublishDate = DateTime.Today.AddDays(_counter)
+                };
 
-            try
-            {
-                await _messageClient.PublishAsync(article, properties, queueName:"article-queue");
-                MonitorService.MonitorService.Log.Debug($"Published article {_counter}");
-                _counter++;
+
+                var activityContext = activity?.Context ?? Activity.Current?.Context ?? default;
+                var propagationContext = new PropagationContext(activityContext, Baggage.Current);
+                var propagator = new TraceContextPropagator();
+
+                var properties = new MessageProperties();
+
+                propagator.Inject(
+                    propagationContext,
+                    properties,
+                    (props, key, value) 
+                        => { props.Headers[key] = value; });
+
+                try
+                {
+                    await _messageClient.PublishAsync(article, properties, queueName: "article-queue");
+                    MonitorService.MonitorService.Log.Debug($"Published article {_counter}");
+                    _counter++;
+                }
+                catch (TaskCanceledException ex)
+                {
+                    Console.WriteLine($"Publish task cancelled: {ex.Message}");
+                    Console.WriteLine($"Stacktrace:  {ex.StackTrace}");
+                    await Task.Delay(2000, stoppingToken);
+                }
+                catch (Exception ex)
+                {
+                    MonitorService.MonitorService.Log.Error(ex, "Failed to publish article. Retrying...");
+                    await Task.Delay(2000, stoppingToken);
+                }
+
+                await Task.Delay(_interval, stoppingToken);
             }
-            catch (TaskCanceledException ex)
-            {
-                Console.WriteLine($"Publish task cancelled: {ex.Message}");
-                Console.WriteLine($"Stacktrace:  {ex.StackTrace}");
-                await Task.Delay(2000, stoppingToken); 
-            }
-            catch (Exception ex)
-            {
-                MonitorService.MonitorService.Log.Error(ex, "Failed to publish article. Retrying...");
-                await Task.Delay(2000, stoppingToken);
-            }
-            
-            await Task.Delay(_interval, stoppingToken);
         }
     }
 }

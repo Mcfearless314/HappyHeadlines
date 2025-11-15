@@ -1,6 +1,8 @@
 using EasyNetQ;
+using OpenTelemetry.Trace;
 using PublisherService;
 using PublisherService.Messaging;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,13 +33,13 @@ builder.Services.AddSingleton<IBus>(sp =>
     throw new Exception("Could not connect to RabbitMQ after multiple attempts.");
 });
 
-
+Log.CloseAndFlush();
+MonitorService.MonitorService.TracerProvider.ForceFlush();
 
 var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
-
 
 app.UseHttpsRedirection();
 

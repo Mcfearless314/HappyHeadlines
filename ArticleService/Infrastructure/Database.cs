@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using ArticleService.Model;
 using Microsoft.AspNetCore.Mvc;
 
@@ -67,7 +68,9 @@ public class Database
 
     public async Task AddArticle(Article article)
     {
-        Console.WriteLine($"Adding article: {article.Title} to database");
+        using var activity = MonitorService.MonitorService.ActivitySource.StartActivity("AddArticleToDatabase", ActivityKind.Server);
+        
+        MonitorService.MonitorService.Log.Debug($"Adding article: {article.Title} to database");
         
         var connection = _dbProvider.GetConnection();
         await connection.OpenAsync();
@@ -96,6 +99,5 @@ public class Database
         command.Parameters.Add(pPublishDate);
 
         await command.ExecuteNonQueryAsync();
-        
     }
 }
