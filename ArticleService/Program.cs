@@ -17,8 +17,8 @@ builder.Services.AddScoped<Database>();
 builder.Services.AddScoped<DbInitializer>();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ArticleCache>();
-//builder.Services.AddHostedService<ArticleBackgroundService>();
-//builder.Services.AddHostedService<ArticleCacheBackgroundService>();
+builder.Services.AddHostedService<ArticleBackgroundService>();
+builder.Services.AddHostedService<ArticleCacheBackgroundService>();
 builder.Services.AddHostedService<ArticleQueueBackgroundService>();
 builder.Services.AddScoped<MessageClient>();
 

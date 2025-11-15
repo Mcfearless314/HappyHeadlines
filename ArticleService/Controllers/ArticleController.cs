@@ -19,9 +19,19 @@ public class ArticleController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IEnumerable<Article>> Get()
+    public async Task<IActionResult> GetArticles([FromQuery] int pageNumber, int pageSize)
     {
-        return await _database.GetArticles();
+        if (pageNumber < 1 || pageSize < 1)
+            return BadRequest("Page Number and Page Size must be positive integers.");
+
+        var articles = await _database.GetArticlesWithPagination(pageNumber, pageSize);
+
+        return Ok(new
+        {
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            Articles = articles
+        });
     }
     
     [HttpGet("{id}")]
