@@ -18,6 +18,8 @@ public class MessageClient
 
     public async Task PublishAsync(Article article, MessageProperties properties, string? queueName = null)
     {
+        using var activity = MonitorService.MonitorService.ActivitySource.StartActivity("Publishing Article");
+        
         var json = JsonConvert.SerializeObject(article);
         var message = new Message<string>(json, properties);
 

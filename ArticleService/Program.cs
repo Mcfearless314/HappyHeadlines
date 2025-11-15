@@ -2,7 +2,9 @@ using ArticleService;
 using ArticleService.Infrastructure;
 using ArticleService.Messaging;
 using EasyNetQ;
+using OpenTelemetry.Trace;
 using Prometheus;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,7 +29,7 @@ builder.Services.AddSingleton<IBus>(sp =>
         try
         {
             var bus = RabbitHutch.CreateBus("host=rmq;virtualHost=/;username=guest;password=guest");
-            Console.WriteLine($"EasyNetQ connected to rabbitmq on attempt {i+1}");
+            MonitorService.MonitorService.Log.Debug($"EasyNetQ connected to rabbitmq on attempt {i + 1}");
             return bus;
         }
         catch (Exception ex)
@@ -39,6 +41,10 @@ builder.Services.AddSingleton<IBus>(sp =>
 
     throw new Exception("Could not connect to RabbitMQ after multiple attempts.");
 });
+
+
+Log.CloseAndFlush();
+MonitorService.MonitorService.TracerProvider.ForceFlush();
 
 var app = builder.Build();
 
